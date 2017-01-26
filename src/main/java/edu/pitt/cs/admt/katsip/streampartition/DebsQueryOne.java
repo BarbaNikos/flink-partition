@@ -7,6 +7,7 @@ import edu.pitt.cs.admt.katsip.streampartition.debs.QueryOneHashPartition;
 import edu.pitt.cs.admt.katsip.streampartition.debs.QueryOneShufflePartition;
 import edu.pitt.cs.admt.katsip.streampartition.flink.NaiveAffinityCardPartitioner;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
@@ -59,7 +60,7 @@ public class DebsQueryOne {
 //        }
         ExecutionEnvironment batchEnv = ExecutionEnvironment.getExecutionEnvironment();
         batchEnv.setParallelism(parallelism);
-        DataSet<Tuple2<Long, String>> rideDataset = batchEnv.readTextFile(args[0]).map(new RichMapFunction<String, Tuple2<Long, String>>() {
+        DataSet<Tuple2<Long, String>> rideDataset = batchEnv.readTextFile(args[0]).flatMap(new RichFlatMapFunction<String, Tuple2<Long, String>>() {
 
             private DebsCellDelegate delegate;
 
@@ -69,12 +70,10 @@ public class DebsQueryOne {
             }
 
             @Override
-            public Tuple2<Long, String> map(String value) throws Exception {
+            public void flatMap(String value, Collector<Tuple2<Long, String>> out) throws Exception {
                 Tuple7<String, Long, Long, String, String, Float, Float> ride = delegate.deserializeRide(value);
                 if (ride != null)
-                    return new Tuple2<>(ride.f2, ride.f3 + "-" + ride.f4);
-                else
-                    return null;
+                    out.collect(new Tuple2<>(ride.f2, ride.f3 + "-" + ride.f4));
             }
         });
         rides = rideDataset.collect();

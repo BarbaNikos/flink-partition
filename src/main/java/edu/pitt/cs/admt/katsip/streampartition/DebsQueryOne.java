@@ -6,6 +6,7 @@ import edu.pitt.cs.admt.katsip.streampartition.debs.QueryOneAffinityPartition;
 import edu.pitt.cs.admt.katsip.streampartition.debs.QueryOneHashPartition;
 import edu.pitt.cs.admt.katsip.streampartition.debs.QueryOneShufflePartition;
 import edu.pitt.cs.admt.katsip.streampartition.flink.NaiveAffinityCardPartitioner;
+import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
@@ -36,6 +37,7 @@ import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Nikos R. Katsipoulakis on 1/16/2017.
@@ -77,6 +79,9 @@ public class DebsQueryOne {
             }
         });
         rides = rideDataset.collect();
+        JobExecutionResult batchJob = batchEnv.execute();
+        System.out.println("Collecting the dataset took: " + (double) (batchJob.getNetRuntime(TimeUnit.MILLISECONDS) / 1000l) + " (sec).");
+
         // Set up environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment().disableOperatorChaining();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);

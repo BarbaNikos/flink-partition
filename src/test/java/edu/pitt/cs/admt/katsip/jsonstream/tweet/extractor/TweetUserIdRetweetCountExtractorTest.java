@@ -20,11 +20,11 @@ public class TweetUserIdRetweetCountExtractorTest {
     public void TweetUserId() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         TweetUserIdExtractor extractor = new TweetUserIdExtractor();
-        extractor.open(new Configuration());
+        extractor.init();
         TweetUserIdRetweetCountExtractor userIdRetweetCountExtractor = new TweetUserIdRetweetCountExtractor();
-        userIdRetweetCountExtractor.open(new Configuration());
+        userIdRetweetCountExtractor.init();
         TweetInReplytoScreenNameExtractor inReplytoScreenNameExtractor = new TweetInReplytoScreenNameExtractor();
-        inReplytoScreenNameExtractor.open(new Configuration());
+        inReplytoScreenNameExtractor.init();
         try (BufferedReader reader = new BufferedReader(new FileReader("src" + File.separator + "main" + File.separator + "resources" + File.separator + "first_10_tweets.json"))) {
             for (String line; (line = reader.readLine()) != null;) {
                 Map<String, Object> tweetData = (Map<String, Object>) mapper.readValue(line, Map.class);
@@ -44,10 +44,20 @@ public class TweetUserIdRetweetCountExtractorTest {
                         userId, userIdRetweetCountExtractor.map(line).f0);
                 Assert.assertEquals("different values for retweet-count from user-id and retweet-count extractor",
                         retweetCount, userIdRetweetCountExtractor.map(line).f1);
-                Assert.assertEquals("different values for in-reply-to-screen-name",
-                        inReplyToScreenName, inReplytoScreenNameExtractor.map(line).f0);
-                Assert.assertEquals("different values for screen-name", screenName,
-                        inReplytoScreenNameExtractor.map(line).f1);
+                if (inReplyToScreenName == null) {
+                    Assert.assertEquals("different values for in-reply-to-screen-name",
+                            "N/A", inReplytoScreenNameExtractor.map(line).f0);
+                } else {
+                    Assert.assertEquals("different values for in-reply-to-screen-name",
+                            inReplyToScreenName, inReplytoScreenNameExtractor.map(line).f0);
+                }
+                if (screenName == null) {
+                    Assert.assertEquals("different values for screen-name", "N/A",
+                            inReplytoScreenNameExtractor.map(line).f1);
+                } else {
+                    Assert.assertEquals("different values for screen-name", screenName,
+                            inReplytoScreenNameExtractor.map(line).f1);
+                }
             }
         }
     }
@@ -57,8 +67,8 @@ public class TweetUserIdRetweetCountExtractorTest {
         ObjectMapper mapper = new ObjectMapper();
         DeleteUserIdExtractor userIdExtractor = new DeleteUserIdExtractor();
         DeleteIdStrUserIdExtractor idStrUserIdExtractor = new DeleteIdStrUserIdExtractor();
-        userIdExtractor.open(new Configuration());
-        idStrUserIdExtractor.open(new Configuration());
+        userIdExtractor.init();
+        idStrUserIdExtractor.init();
         try (BufferedReader reader = new BufferedReader(new FileReader("src" + File.separator + "main" + File.separator + "resources" + File.separator + "first_10_deletes.json"))) {
             for (String line; (line = reader.readLine()) != null;) {
                 Map<String, Object> deleteData = mapper.readValue(line, Map.class);

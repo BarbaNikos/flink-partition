@@ -25,6 +25,10 @@ public class DeleteIdStrUserIdExtractor extends RichMapFunction<String, Tuple2<L
 
     private JsonFactory jsonFactory;
 
+    public void init() {
+        jsonFactory = new JsonFactory();
+    }
+
     @Override
     public void open(Configuration configuration) {
         jsonFactory = new JsonFactory();

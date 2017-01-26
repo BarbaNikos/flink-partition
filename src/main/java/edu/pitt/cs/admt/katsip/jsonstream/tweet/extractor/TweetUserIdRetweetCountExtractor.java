@@ -21,6 +21,10 @@ public class TweetUserIdRetweetCountExtractor extends RichMapFunction<String, Tu
 
     private JsonFactory jsonFactory;
 
+    public void init() {
+        jsonFactory = new JsonFactory();
+    }
+
     @Override
     public void open(Configuration parameters) throws Exception {
         jsonFactory = new JsonFactory();

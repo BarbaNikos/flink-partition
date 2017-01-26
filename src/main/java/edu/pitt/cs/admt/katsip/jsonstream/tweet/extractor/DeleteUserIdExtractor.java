@@ -18,6 +18,10 @@ public class DeleteUserIdExtractor extends RichMapFunction<String, Long> {
 
     private JsonFactory jsonFactory;
 
+    public void init() {
+        jsonFactory = new JsonFactory();
+    }
+
     @Override
     public void open(Configuration configuration) {
         jsonFactory = new JsonFactory();

@@ -52,14 +52,6 @@ public class DebsQueryOne {
         Preconditions.checkArgument(parallelism >= 1);
         Preconditions.checkArgument(args[2].equals("shf") || args[2].equals("fld") || args[2].equals("ak"));
         List<Tuple2<Long, String>> rides;
-//        try (BufferedReader reader = new BufferedReader(new FileReader(args[0]))) {
-//            DebsCellDelegate delegate = new DebsCellDelegate(DebsCellDelegate.Query.FREQUENT_ROUTE);
-//            for (String line; (line = reader.readLine()) != null; ) {
-//                Tuple7<String, Long, Long, String, String, Float, Float> ride = delegate.deserializeRide(line);
-//                if (ride != null)
-//                    rides.add(new Tuple2<>(ride.f2, ride.f3 + "-" + ride.f4));
-//            }
-//        }
         ExecutionEnvironment batchEnv = ExecutionEnvironment.getExecutionEnvironment();
         batchEnv.setParallelism(parallelism);
         DataSet<Tuple2<Long, String>> rideDataset = batchEnv.readTextFile(args[0]).flatMap(new RichFlatMapFunction<String, Tuple2<Long, String>>() {
@@ -79,8 +71,9 @@ public class DebsQueryOne {
             }
         });
         rides = rideDataset.collect();
-        JobExecutionResult batchJob = batchEnv.execute();
-        System.out.println("Collecting the dataset took: " + (double) (batchJob.getNetRuntime(TimeUnit.MILLISECONDS) / 1000l) + " (sec).");
+        JobExecutionResult batchJob = batchEnv.getLastJobExecutionResult();
+        System.out.println("Collecting the dataset took: " + (double) (batchJob.getNetRuntime(TimeUnit.MILLISECONDS) / 1000l) +
+                " (sec). Total elements: " + rides.size());
 
         // Set up environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment().disableOperatorChaining();

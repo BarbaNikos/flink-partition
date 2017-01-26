@@ -7,10 +7,14 @@ import edu.pitt.cs.admt.katsip.streampartition.debs.QueryOneHashPartition;
 import edu.pitt.cs.admt.katsip.streampartition.debs.QueryOneShufflePartition;
 import edu.pitt.cs.admt.katsip.streampartition.flink.NaiveAffinityCardPartitioner;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.RichMapFunction;
+import org.apache.flink.api.java.DataSet;
+import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple7;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.AllWindowedStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -44,18 +48,38 @@ public class DebsQueryOne {
         int parallelism = Integer.parseInt(args[1]);
         Preconditions.checkArgument(parallelism >= 1);
         Preconditions.checkArgument(args[2].equals("shf") || args[2].equals("fld") || args[2].equals("ak"));
-        List<Tuple2<Long, String>> rides = new LinkedList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(args[0]))) {
-            DebsCellDelegate delegate = new DebsCellDelegate(DebsCellDelegate.Query.FREQUENT_ROUTE);
-            for (String line; (line = reader.readLine()) != null; ) {
-                Tuple7<String, Long, Long, String, String, Float, Float> ride = delegate.deserializeRide(line);
-                if (ride != null)
-                    rides.add(new Tuple2<>(ride.f2, ride.f3 + "-" + ride.f4));
+        List<Tuple2<Long, String>> rides;
+//        try (BufferedReader reader = new BufferedReader(new FileReader(args[0]))) {
+//            DebsCellDelegate delegate = new DebsCellDelegate(DebsCellDelegate.Query.FREQUENT_ROUTE);
+//            for (String line; (line = reader.readLine()) != null; ) {
+//                Tuple7<String, Long, Long, String, String, Float, Float> ride = delegate.deserializeRide(line);
+//                if (ride != null)
+//                    rides.add(new Tuple2<>(ride.f2, ride.f3 + "-" + ride.f4));
+//            }
+//        }
+        ExecutionEnvironment batchEnv = ExecutionEnvironment.getExecutionEnvironment();
+        batchEnv.setParallelism(parallelism);
+        DataSet<Tuple2<Long, String>> rideDataset = batchEnv.readTextFile(args[0]).map(new RichMapFunction<String, Tuple2<Long, String>>() {
+
+            private DebsCellDelegate delegate;
+
+            @Override
+            public void open(Configuration parameters) throws Exception {
+                this.delegate = new DebsCellDelegate(DebsCellDelegate.Query.FREQUENT_ROUTE);
             }
-        }
+
+            @Override
+            public Tuple2<Long, String> map(String value) throws Exception {
+                Tuple7<String, Long, Long, String, String, Float, Float> ride = delegate.deserializeRide(value);
+                if (ride != null)
+                    return new Tuple2<>(ride.f2, ride.f3 + "-" + ride.f4);
+                else
+                    return null;
+            }
+        });
+        rides = rideDataset.collect();
         // Set up environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment().disableOperatorChaining();
-//        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironment().disableOperatorChaining();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         // Phase 0: Collect input and assign timestamps
         DataStreamSource<Tuple2<Long, String>> rideStream = env.fromCollection(rides);

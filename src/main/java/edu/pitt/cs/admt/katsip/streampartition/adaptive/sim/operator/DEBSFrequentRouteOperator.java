@@ -1,6 +1,6 @@
 package edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.operator;
 
-import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.DebsRouteExtractorI;
+import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.DebsRouteExtractor;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple7;
@@ -13,13 +13,13 @@ import java.util.HashMap;
  */
 public class DEBSFrequentRouteOperator extends Operator<Tuple7<String,Long,Long,String,String,Float,Float>,Tuple2<String,Integer>> {
 
-    private DebsRouteExtractorI extractor;
+    private DebsRouteExtractor extractor;
 
     private DescriptiveStatistics statistics;
 
     public DEBSFrequentRouteOperator() {
         super();
-        extractor = new DebsRouteExtractorI();
+        extractor = new DebsRouteExtractor();
         statistics = new DescriptiveStatistics();
     }
 

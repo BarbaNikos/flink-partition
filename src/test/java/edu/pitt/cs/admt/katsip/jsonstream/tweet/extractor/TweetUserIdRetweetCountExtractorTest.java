@@ -25,7 +25,7 @@ public class TweetUserIdRetweetCountExtractorTest {
         userIdRetweetCountExtractor.open(new Configuration());
         TweetInReplytoScreenNameExtractor inReplytoScreenNameExtractor = new TweetInReplytoScreenNameExtractor();
         inReplytoScreenNameExtractor.open(new Configuration());
-        try (BufferedReader reader = new BufferedReader(new FileReader("src" + File.separator + "main" + File.separator + "resources" + File.separator + "first_1000_tweets.json"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src" + File.separator + "main" + File.separator + "resources" + File.separator + "first_10_tweets.json"))) {
             for (String line; (line = reader.readLine()) != null;) {
                 Map<String, Object> tweetData = (Map<String, Object>) mapper.readValue(line, Map.class);
                 Map<String, Object> userData = (Map<String, Object>) tweetData.get("user");
@@ -59,7 +59,7 @@ public class TweetUserIdRetweetCountExtractorTest {
         DeleteIdStrUserIdExtractor idStrUserIdExtractor = new DeleteIdStrUserIdExtractor();
         userIdExtractor.open(new Configuration());
         idStrUserIdExtractor.open(new Configuration());
-        try (BufferedReader reader = new BufferedReader(new FileReader("src" + File.separator + "main" + File.separator + "resources" + File.separator + "first_100_deletes.json"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src" + File.separator + "main" + File.separator + "resources" + File.separator + "first_10_deletes.json"))) {
             for (String line; (line = reader.readLine()) != null;) {
                 Map<String, Object> deleteData = mapper.readValue(line, Map.class);
                 Map<String, Object> statusData = (Map<String,Object>) ((Map<String,Object>) deleteData.get("delete")).get("status");

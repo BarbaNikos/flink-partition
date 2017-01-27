@@ -1,16 +1,13 @@
 package edu.pitt.cs.admt.katsip.streampartition.adaptive.sim;
 
 import com.google.common.base.Charsets;
-import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.aggregator.Aggregator;
-import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.aggregator.DEBSFrequentRouteAggregator;
 import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.extractor.IKeyExtractor;
 import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.extractor.ITimeExtractor;
-import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.operator.DEBSFrequentRouteOperator;
 import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.operator.Operator;
 import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.partitioner.FieldPartitioner;
 import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.partitioner.IPartitioner;
 import edu.pitt.cs.admt.katsip.streampartition.adaptive.sim.partitioner.Partitioner;
-import edu.pitt.cs.admt.katsip.streampartition.debs.DebsCellDelegate;
+import edu.pitt.cs.admt.katsip.streampartition.debs.util.DebsCellDelegate;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple7;

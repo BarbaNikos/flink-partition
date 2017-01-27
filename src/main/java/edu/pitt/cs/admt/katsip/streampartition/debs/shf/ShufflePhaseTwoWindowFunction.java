@@ -97,12 +97,12 @@ public class ShufflePhaseTwoWindowFunction extends
             if (topTen.size() >= 10)
                 break;
         }
+        long end = System.currentTimeMillis();
         stringBuilder.append("}");
         String s = "From: " + dateFormat.format(new Date(window.getStart())) + ", To: " + dateFormat.format(new Date(window.getEnd())) +
                 ", Most frequent routes: " + stringBuilder.toString();
         out.collect(s);
         maxInput = maxInput < inputSize ? inputSize : maxInput;
-        long end = System.currentTimeMillis();
         statistics.addValue(Math.abs(end - start));
     }
 }

@@ -1,9 +1,9 @@
-package edu.pitt.cs.admt.katsip.streampartition.debs.fld;
+package edu.pitt.cs.admt.katsip.streampartition.gcm.fld;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.flink.api.common.accumulators.IntCounter;
 import org.apache.flink.api.common.accumulators.IntMaximum;
-import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.windowing.RichAllWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
@@ -13,13 +13,13 @@ import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
 
 /**
- * Created by Nikos R. Katsipoulakis on 1/23/2017.
+ * Created by Nikos R. Katsipoulakis on 1/27/2017.
  */
-public class HashPhaseTwoWindowFunction extends
-        RichAllWindowFunction<Tuple3<Long, String, Integer>, String, TimeWindow> {
+public class HashPhaseTwoWindowFunction extends RichAllWindowFunction<Tuple4<Long, Long, Float, Integer>, String, TimeWindow> {
 
     private Logger log = LoggerFactory.getLogger(HashPhaseTwoWindowFunction.class);
 
@@ -56,45 +56,21 @@ public class HashPhaseTwoWindowFunction extends
     }
 
     @Override
-    public void apply(TimeWindow window, Iterable<Tuple3<Long, String, Integer>> values,
-                      Collector<String> out) throws Exception {
-        numberOfApplyCalls.add(1);
+    public void apply(TimeWindow window, Iterable<Tuple4<Long, Long, Float, Integer>> values, Collector<String> out) throws Exception {
         DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
-        TreeMap<Integer, List<String>> index = new TreeMap<>();
+        numberOfApplyCalls.add(1);
+        HashMap<Long, Float> index = new HashMap<>();
         int inputSize = 0;
         long start = System.currentTimeMillis();
-        for (Tuple3<Long, String, Integer> event : values) {
+        for (Tuple4<Long, Long, Float, Integer> event : values) {
             ++inputSize;
-            if (index.containsKey(event.f2)) {
-                List<String> tmp = index.get(event.f2);
-                if (!tmp.contains(event.f1)) {
-                    tmp.add(event.f1);
-                    index.put(event.f2, tmp);
-                }
-            } else {
-                List<String> tmp = new LinkedList<>();
-                tmp.add(event.f1);
-                index.put(event.f2, tmp);
-            }
-        }
-        List<String> topTen = new LinkedList<>();
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{");
-        for (Integer count : index.descendingKeySet()) {
-            List<String> route = index.get(count);
-            for (String r : route) {
-                topTen.add(r);
-                stringBuilder.append(r + ":" + count + ",");
-            }
-            if (topTen.size() >= 10)
-                break;
+            index.put(event.f1, event.f2 / event.f3);
         }
         long end = System.currentTimeMillis();
-        stringBuilder.append("}");
-        String s = "From: " + dateFormat.format(new Date(window.getStart())) + ", To: " + dateFormat.format(new Date(window.getEnd())) +
-                ", Most frequent routes: " + stringBuilder.toString();
-        out.collect(s);
         maxInput = maxInput < inputSize ? inputSize : maxInput;
         statistics.addValue(Math.abs(end - start));
+        String s = "from: " + dateFormat.format(new Date(window.getStart())) + ", to: " + dateFormat.format(new Date(window.getEnd())) +
+                ", total-groups: " + index.keySet();
+        out.collect(s);
     }
 }

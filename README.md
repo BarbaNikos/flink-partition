@@ -12,16 +12,17 @@ costs that come with distributed processing (i.e., network costs, coordination o
 
 # Benchmarks
 ## Cluster start 
+
 Issue the command:
 
-$FLINK_HOME/bin/start-local.sh
+>$FLINK_HOME/bin/start-local.sh
 
 ## TPC-H
 
 ## ACM DEBS 2015 Challenge
 
-flink-1.1.4/bin/flink run -c edu.pitt.cs.admt.katsip.streampartition.DebsQueryOne flink-partition/target/flink-partition-0.0.1-jar-with-dependencies.jar /home/ubuntu/data/debs_small.csv 16 shf
+>$FLINK_HOME/bin/flink run -c edu.pitt.cs.admt.katsip.streampartition.DebsQueryOne flink-partition/target/flink-partition-0.0.1-jar-with-dependencies.jar data/debs_small.csv num-workers {shf, fld}
 
 ## Google cluster monitoring dataset
 
-flink-1.1.4/bin/flink run -c edu.pitt.cs.admt.katsip.streampartition.gcm.GcmQueryTwo flink-partition/target/flink-partition-0.0.1-jar-with-dependencies.jar /home/ubuntu/data/gcm_glue_task_events.csv 16 shf
+>$FLINK_HOME/bin/flink run -c edu.pitt.cs.admt.katsip.streampartition.gcm.GcmQueryTwo flink-partition/target/flink-partition-0.0.1-jar-with-dependencies.jar gcm_glue_task_events.csv num-workers {shf, fld}

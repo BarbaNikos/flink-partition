@@ -32,7 +32,7 @@ public class QueryTwoShufflePartition {
         DataStream<String> serialAggregation = parallelComputation
                 .windowAll(TumblingEventTimeWindows.of(Time.minutes(60)))
                 .apply(new ShufflePhaseTwoWindowFunction()).setParallelism(1);
-        serialAggregation.print();
+        //serialAggregation.print();
         JobExecutionResult executionResult = env.execute();
         int phaseOneNumCalls = executionResult.getAccumulatorResult(ShufflePhaseOneWindowFunction.numberOfCallsAccumulator);
         int phaseTwoNumCalls = executionResult.getAccumulatorResult(ShufflePhaseTwoWindowFunction.numCallsAccumulatorName);

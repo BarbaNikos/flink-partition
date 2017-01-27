@@ -26,7 +26,7 @@ public class QueryTwoHashPartition {
         DataStream<String> serialAggregation = parallelComputation
                 .windowAll(TumblingEventTimeWindows.of(Time.minutes(60)))
                 .apply(new HashPhaseTwoWindowFunction()).setParallelism(1);
-        serialAggregation.print();
+        //serialAggregation.print();
         JobExecutionResult executionResult = env.execute();
         int phaseOneNumCalls = executionResult.getAccumulatorResult(HashPhaseOneWindowFunction.numberOfCallsAccumulator);
         int phaseTwoNumCalls = executionResult.getAccumulatorResult(HashPhaseTwoWindowFunction.numCallsAccumulatorName);

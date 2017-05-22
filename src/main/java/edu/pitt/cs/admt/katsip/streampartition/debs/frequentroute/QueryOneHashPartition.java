@@ -3,12 +3,14 @@ package edu.pitt.cs.admt.katsip.streampartition.debs.frequentroute;
 import edu.pitt.cs.admt.katsip.streampartition.debs.fld.HashPhaseOneWindowFunction;
 import edu.pitt.cs.admt.katsip.streampartition.debs.fld.HashPhaseTwoWindowFunction;
 import org.apache.flink.api.common.JobExecutionResult;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,5 +40,27 @@ public class QueryOneHashPartition {
         System.out.println("FLD Net runtime: " + jobNetRuntime + " (msec). Phase 1 max input size: " + phaseOneMaxInputSize +
                 ", Phase 2 max input size: " + phaseTwoMaxInputSize + ", P1 number of calls: " + phaseOneNumCalls +
                 ", P2 number of calls: " + phaseTwoNumCalls);
+    }
+
+    public static DataStream<Tuple2<Long, List<Tuple2<String, Integer>>>> submit(
+            DataStream<Tuple3<Long, String, Integer>> rideStream, int parallelism) {
+        DataStream<Tuple3<Long, String, Integer>> phaseOne = rideStream
+                .keyBy(1)
+                .window(TumblingEventTimeWindows.of(Time.minutes(30)))
+                .apply(new HashPhaseOneWindowFunction())
+                .setParallelism(parallelism);
+        return phaseOne.windowAll(TumblingEventTimeWindows.of(Time.minutes(30)))
+                .apply(new FrequentRouteSerialAggregation()).setParallelism(1);
+    }
+
+    public static DataStream<Tuple2<Long, List<Tuple2<String, Integer>>>> shedSubmit(
+            DataStream<Tuple3<Long, String, Integer>> rideStream, int parallelism, double shedProbability) {
+        DataStream<Tuple3<Long, String, Integer>> phaseOne = rideStream
+                .keyBy(1)
+                .window(TumblingEventTimeWindows.of(Time.minutes(30)))
+                .apply(new PhaseOneShedWindowFunction(shedProbability))
+                .setParallelism(parallelism);
+        return phaseOne.windowAll(TumblingEventTimeWindows.of(Time.minutes(30)))
+                .apply(new FrequentRouteSerialAggregation()).setParallelism(1);
     }
 }

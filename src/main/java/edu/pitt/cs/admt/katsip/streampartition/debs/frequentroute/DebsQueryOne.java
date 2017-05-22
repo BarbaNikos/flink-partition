@@ -29,30 +29,6 @@ public class DebsQueryOne {
         int parallelism = Integer.parseInt(args[1]);
         Preconditions.checkArgument(parallelism >= 1);
         Preconditions.checkArgument(args[2].equals("shf") || args[2].equals("fld") || args[2].equals("ak"));
-//        List<Tuple2<Long, String>> rides;
-//        ExecutionEnvironment batchEnv = ExecutionEnvironment.getExecutionEnvironment();
-//        batchEnv.setParallelism(parallelism);
-//        DataSet<Tuple2<Long, String>> rideDataset = batchEnv.readTextFile(args[0]).flatMap(new RichFlatMapFunction<String, Tuple2<Long, String>>() {
-//
-//            private DebsCellDelegate delegate;
-//
-//            @Override
-//            public void open(Configuration parameters) throws Exception {
-//                this.delegate = new DebsCellDelegate(DebsCellDelegate.Query.FREQUENT_ROUTE);
-//            }
-//
-//            @Override
-//            public void flatMap(String value, Collector<Tuple2<Long, String>> out) throws Exception {
-//                Tuple7<String, Long, Long, String, String, Float, Float> ride = delegate.deserializeRide(value);
-//                if (ride != null)
-//                    out.collect(new Tuple2<>(ride.f2, ride.f3 + "-" + ride.f4));
-//            }
-//        });
-//        rides = rideDataset.collect();
-//        JobExecutionResult batchJob = batchEnv.getLastJobExecutionResult();
-//        System.out.println("Collecting the dataset took: " + (double) (batchJob.getNetRuntime(TimeUnit.MILLISECONDS) / 1000l) +
-//                " (sec). Total elements: " + rides.size());
-
         // Set up environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);

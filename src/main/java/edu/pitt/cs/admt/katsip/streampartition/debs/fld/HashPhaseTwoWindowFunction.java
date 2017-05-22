@@ -52,7 +52,7 @@ public class HashPhaseTwoWindowFunction extends
                 ", mean: " + statistics.getMean() + ", max: " + statistics.getMax() + ", min: " +
                 statistics.getMin() + " (msec).";
         log.info(msg);
-        System.out.println(msg);
+        //System.out.println(msg);
     }
 
     @Override

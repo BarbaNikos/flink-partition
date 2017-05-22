@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by Nikos R. Katsipoulakis on 1/23/2017.
@@ -55,7 +57,8 @@ public class HashPhaseOneWindowFunction extends RichWindowFunction<Tuple3<Long, 
     }
 
     @Override
-    public void apply(Tuple tuple, TimeWindow window, Iterable<Tuple3<Long, String, Integer>> input, Collector<Tuple3<Long, String, Integer>> out) throws Exception {
+    public void apply(Tuple tuple, TimeWindow window, Iterable<Tuple3<Long, String, Integer>> input,
+                      Collector<Tuple3<Long, String, Integer>> out) throws Exception {
         HashMap<String, Integer> partialFrequencyIndex = new HashMap<>();
         numberOfApplyCalls.add(1);
         int inputSize = 0;

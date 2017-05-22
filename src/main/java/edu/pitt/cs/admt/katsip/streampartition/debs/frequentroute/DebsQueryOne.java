@@ -57,23 +57,21 @@ public class DebsQueryOne {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment().disableOperatorChaining();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         // Phase 0: Collect input and assign timestamps
-        DataStream<Tuple2<Long, String>> rideStream = env.readTextFile(args[0]).flatMap(new RichFlatMapFunction<String, Tuple2<Long, String>>() {
-
-            private DebsCellDelegate delegate;
-
-            @Override
-            public void open(Configuration parameters) throws Exception {
-                this.delegate = new DebsCellDelegate(DebsCellDelegate.Query.FREQUENT_ROUTE);
-            }
-
-            @Override
-            public void flatMap(String value, Collector<Tuple2<Long, String>> out) throws Exception {
-                Tuple7<String, Long, Long, String, String, Float, Float> ride = delegate.deserializeRide(value);
-                if (ride != null)
-                    out.collect(new Tuple2<>(ride.f2, ride.f3 + "-" + ride.f4));
-            }
-        });
-//        DataStreamSource<Tuple2<Long, String>> rideStream = env.fromCollection(rides);
+        DataStream<Tuple2<Long, String>> rideStream = env
+                .readTextFile(args[0])
+                .flatMap(new RichFlatMapFunction<String, Tuple2<Long, String>>() {
+                    private DebsCellDelegate delegate;
+                    @Override
+                    public void open(Configuration parameters) throws Exception {
+                        this.delegate = new DebsCellDelegate(DebsCellDelegate.Query.FREQUENT_ROUTE);
+                    }
+                    @Override
+                    public void flatMap(String value, Collector<Tuple2<Long, String>> out) throws Exception {
+                        Tuple7<String, Long, Long, String, String, Float, Float> ride = delegate.deserializeRide(value);
+                        if (ride != null)
+                            out.collect(new Tuple2<>(ride.f2, ride.f3 + "-" + ride.f4));
+                    }
+                });
         DataStream<Tuple3<Long, String, Integer>> timestampedRideStream = rideStream
                 .map(new MapFunction<Tuple2<Long, String>, Tuple3<Long, String, Integer>>() {
                     @Override
@@ -86,7 +84,7 @@ public class DebsQueryOne {
                     public long extractAscendingTimestamp(Tuple3<Long, String, Integer> event) {
                         return event.f0;
                     }
-        });
+                });
         switch (args[2]) {
             case "shf":
                 QueryOneShufflePartition.submit(env, timestampedRideStream, parallelism);

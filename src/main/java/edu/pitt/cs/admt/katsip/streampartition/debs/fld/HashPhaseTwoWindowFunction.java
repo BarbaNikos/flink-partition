@@ -92,7 +92,7 @@ public class HashPhaseTwoWindowFunction extends
         long end = System.currentTimeMillis();
         stringBuilder.append("}");
         String s = "From: " + dateFormat.format(new Date(window.getStart())) + ", To: " + dateFormat.format(new Date(window.getEnd())) +
-                ", Most frequent routes: " + stringBuilder.toString();
+                ", Most frequent routes: " + stringBuilder.toString() + " (window-size: " + inputSize + ").";
         out.collect(s);
         maxInput = maxInput < inputSize ? inputSize : maxInput;
         statistics.addValue(Math.abs(end - start));

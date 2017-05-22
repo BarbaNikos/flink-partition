@@ -15,7 +15,9 @@ import java.util.concurrent.TimeUnit;
  * Created by Nikos R. Katsipoulakis on 1/23/2017.
  */
 public class QueryOneHashPartition {
-    public static void submit(StreamExecutionEnvironment env, DataStream<Tuple3<Long, String, Integer>> timestampedRideStream, int parallelism) throws Exception {
+    public static void submit(StreamExecutionEnvironment env,
+                              DataStream<Tuple3<Long, String, Integer>> timestampedRideStream,
+                              int parallelism) throws Exception {
         // Phase 1: parallel partial aggregation
         DataStream<Tuple3<Long, String, Integer>> parallelComputation = timestampedRideStream
                 .keyBy(1)
@@ -26,7 +28,7 @@ public class QueryOneHashPartition {
         DataStream<String> serialAggregation = parallelComputation
                 .windowAll(TumblingEventTimeWindows.of(Time.minutes(30)))
                 .apply(new HashPhaseTwoWindowFunction()).setParallelism(1);
-//        serialAggregation.print();
+        serialAggregation.print();
         JobExecutionResult executionResult = env.execute();
         int phaseOneNumCalls = executionResult.getAccumulatorResult(HashPhaseOneWindowFunction.numberOfCallsAccumulator);
         int phaseTwoNumCalls = executionResult.getAccumulatorResult(HashPhaseTwoWindowFunction.numCallsAccumulatorName);

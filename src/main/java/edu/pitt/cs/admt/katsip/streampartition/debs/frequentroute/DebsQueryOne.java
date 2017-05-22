@@ -54,7 +54,7 @@ public class DebsQueryOne {
 //                " (sec). Total elements: " + rides.size());
 
         // Set up environment
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment().disableOperatorChaining();
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         // Phase 0: Collect input and assign timestamps
         DataStream<Tuple2<Long, String>> rideStream = env

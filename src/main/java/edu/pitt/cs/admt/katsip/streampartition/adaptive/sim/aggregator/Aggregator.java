@@ -9,6 +9,6 @@ public abstract class Aggregator<T> implements IAggregator<T> {
   
   @Override
   public void aggregate(Collection<T> batch) {
-  
+
   }
 }

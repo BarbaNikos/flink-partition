@@ -74,13 +74,12 @@ public class PhaseOneShedWindowFunction extends RichWindowFunction<Tuple3<Long, 
         partialFrequencyIndex.put(t.f1, t.f2);
       ++inputSize;
     }
-//        if (partialFrequencyIndex.isEmpty()) {
-//            Iterator<Tuple3<Long, String, Integer>> it = input.iterator();
-//            if (it.hasNext()) {
-//                Tuple3<Long, String, Integer> t = it.next();
-//                partialFrequencyIndex.put(t.f1, t.f2);
-//            }
-//        }
+    if (partialFrequencyIndex.isEmpty()) {
+      for (Tuple3<Long, String, Integer> t : input) {
+        partialFrequencyIndex.put(t.f1, t.f2);
+        break;
+      }
+    }
     long end = System.currentTimeMillis();
     for (String key : partialFrequencyIndex.keySet())
       out.collect(new Tuple3<>(window.getEnd(), key, partialFrequencyIndex.get(key)));

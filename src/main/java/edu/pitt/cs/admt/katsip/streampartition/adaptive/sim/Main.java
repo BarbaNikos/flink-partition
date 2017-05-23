@@ -53,7 +53,7 @@ public class Main {
     fieldPartitioner.init(rideStream);
     
     while (fieldPartitioner.partitionNextBatch(buffers) != IPartitioner.PARTITION_STATE.COMPLETE) {
-    
+
     }
   }
   

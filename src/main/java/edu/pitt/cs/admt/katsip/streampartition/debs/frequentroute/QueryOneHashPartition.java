@@ -57,7 +57,8 @@ public class QueryOneHashPartition {
               @Override
               public long extractAscendingTimestamp(Tuple2<Long, List<Tuple2<String, Integer>>> t) {
                 return t.f0;
-              }});
+              }
+            });
   }
   
   public static DataStream<Tuple2<Long, List<Tuple2<String, Integer>>>> shedSubmit(
@@ -74,6 +75,7 @@ public class QueryOneHashPartition {
               @Override
               public long extractAscendingTimestamp(Tuple2<Long, List<Tuple2<String, Integer>>> t) {
                 return t.f0;
-              }});
+              }
+            });
   }
 }

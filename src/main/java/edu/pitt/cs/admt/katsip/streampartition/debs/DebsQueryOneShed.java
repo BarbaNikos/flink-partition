@@ -1,6 +1,7 @@
 package edu.pitt.cs.admt.katsip.streampartition.debs;
 
 import edu.pitt.cs.admt.katsip.streampartition.debs.frequentroute.QueryOneHashPartition;
+import edu.pitt.cs.admt.katsip.streampartition.debs.frequentroute.ShedErrorFunction;
 import edu.pitt.cs.admt.katsip.streampartition.util.SimUtils;
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.functions.JoinFunction;
@@ -59,42 +60,30 @@ public class DebsQueryOneShed {
                 return t.f0;
               }
             });
-    // Phase 1: Normal and Shed Calculation
-    DataStream<Tuple2<Long, List<Tuple2<String, Integer>>>> noShed = QueryOneHashPartition.submit(
-        rideStream, parallelism);
-    DataStream<Tuple2<Long, List<Tuple2<String, Integer>>>> withShed = QueryOneHashPartition
-        .shedSubmit(rideStream, parallelism, shedProbability);
-    // Phase 2: Join and compare results
-    DataStream<Tuple3<Long, Double, Double>> result = noShed
-        .join(withShed)
-        .where(new KeySelector<Tuple2<Long, List<Tuple2<String, Integer>>>, Long>() {
-          @Override
-          public Long getKey(Tuple2<Long, List<Tuple2<String, Integer>>> t) throws Exception {
-            return t.f0;
-          }})
-        .equalTo(new KeySelector<Tuple2<Long, List<Tuple2<String, Integer>>>, Long>() {
-          @Override
-          public Long getKey(Tuple2<Long, List<Tuple2<String, Integer>>> t) throws Exception {
-            return t.f0;
-          }})
-        .window(TumblingEventTimeWindows.of(Time.minutes(30)))
-        .apply(new JoinFunction<Tuple2<Long, List<Tuple2<String, Integer>>>,
-            Tuple2<Long, List<Tuple2<String, Integer>>>, Tuple3<Long, Double, Double>>() {
-          @Override
-          public Tuple3<Long, Double, Double> join(
-              Tuple2<Long, List<Tuple2<String, Integer>>> t1,
-              Tuple2<Long, List<Tuple2<String, Integer>>> t2) throws Exception {
-            List<String> t1Keys = new ArrayList<>();
-            for (Tuple2<String, Integer> t : t1.f1)
-              t1Keys.add(t.f0);
-            List<String> t2Keys = new ArrayList<>();
-            for (Tuple2<String, Integer> t : t2.f1)
-              t2Keys.add(t.f0);
-            return new Tuple3<>(t1.f0,
-                SimUtils.RankedBiasedDistance(t1Keys, t2Keys, 0.8),
-                SimUtils.JaccardSimilarity(t1Keys, t2Keys));
-          }});
-    result.writeAsCsv(outputFileName);
-    JobExecutionResult executionResult = env.execute();
+    env.execute();
+    for (int i = 0; i < 100; ++i) {
+      // Phase 1: Normal and Shed Calculation
+      DataStream<Tuple2<Long, List<Tuple2<String, Integer>>>> noShed = QueryOneHashPartition.submit(
+          rideStream, parallelism);
+      DataStream<Tuple2<Long, List<Tuple2<String, Integer>>>> withShed = QueryOneHashPartition
+          .shedSubmit(rideStream, parallelism, shedProbability);
+      // Phase 2: Join and compare results
+      DataStream<Tuple3<Long, Double, Double>> result = noShed
+          .join(withShed)
+          .where(new KeySelector<Tuple2<Long, List<Tuple2<String, Integer>>>, Long>() {
+            @Override
+            public Long getKey(Tuple2<Long, List<Tuple2<String, Integer>>> t) throws Exception {
+              return t.f0;
+            }})
+          .equalTo(new KeySelector<Tuple2<Long, List<Tuple2<String, Integer>>>, Long>() {
+            @Override
+            public Long getKey(Tuple2<Long, List<Tuple2<String, Integer>>> t) throws Exception {
+              return t.f0;
+            }})
+          .window(TumblingEventTimeWindows.of(Time.minutes(30)))
+          .apply(new ShedErrorFunction(rbdP));
+      JobExecutionResult executionResult = env.execute();
+      
+    }
   }
 }

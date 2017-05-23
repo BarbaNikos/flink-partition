@@ -1,13 +1,11 @@
 package edu.pitt.cs.admt.katsip.streampartition.debs.frequentroute;
 
 import edu.pitt.cs.admt.katsip.streampartition.debs.util.DebsCellDelegate;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.operators.Order;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple4;
-import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.api.java.tuple.Tuple7;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
@@ -19,9 +17,9 @@ public class ProduceCompactFile {
   public static void main(String[] args) throws Exception {
     if (args.length < 2) {
       System.err.println("arguments: <input-rides.csv> <output-rides.csv>");
+      System.exit(1);
     }
     final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-    
     DataSet<Tuple4<Long, Long, String, String>> compactRides = env
         .readTextFile(args[0])
         .flatMap(new RichFlatMapFunction<String, Tuple4<Long, Long, String, String>>() {

@@ -48,9 +48,8 @@ public class DebsQueryOneShed {
           @Override
           public Tuple3<Long, String, Integer> map(String s) throws Exception {
             String[] tokens = s.split(",");
-            return new Tuple3<Long, String, Integer>(Long.parseLong(tokens[2]),
-                tokens[3] + "." + tokens[4] + "-" + tokens[5] +
-                    "." + tokens[6], 1);
+            return new Tuple3<Long, String, Integer>(Long.parseLong(tokens[1]),
+                tokens[2] + "-" + tokens[3], 1);
           }
         })
         .assignTimestampsAndWatermarks(

@@ -15,25 +15,24 @@ import java.util.List;
  */
 public class FieldPartitioner<TInput> extends Partitioner<TInput> {
 
-    private IKeyExtractor<TInput> fieldExtractor;
+  private final HashFunction h1 = Hashing.murmur3_128(13);
+  private IKeyExtractor<TInput> fieldExtractor;
 
-    private final HashFunction h1 = Hashing.murmur3_128(13);
+  public FieldPartitioner(List<Integer> workers, IKeyExtractor<TInput> fieldExtractor) {
+    super(workers);
+    this.fieldExtractor = fieldExtractor;
+  }
 
-    public FieldPartitioner(List<Integer> workers, IKeyExtractor<TInput> fieldExtractor) {
-        super(workers);
-        this.fieldExtractor = fieldExtractor;
-    }
+  public FieldPartitioner(List<Integer> workers, Time window, IKeyExtractor<TInput> fieldExtractor,
+                          ITimeExtractor<TInput> timeExtractor) {
+    super(workers, window, timeExtractor);
+    this.fieldExtractor = fieldExtractor;
+  }
 
-    public FieldPartitioner(List<Integer> workers, Time window, IKeyExtractor<TInput> fieldExtractor,
-                            ITimeExtractor<TInput> timeExtractor) {
-        super(workers, window, timeExtractor);
-        this.fieldExtractor = fieldExtractor;
-    }
-
-    @Override
-    public void partition(TInput record, AbstractMap<Integer, Collection<TInput>> buffers) {
-        byte[] raw = fieldExtractor.extractField(record);
-        int first = (int) (Math.abs(h1.hashBytes(raw).asLong()) % workers.size());
-        buffers.get(first).add(record);
-    }
+  @Override
+  public void partition(TInput record, AbstractMap<Integer, Collection<TInput>> buffers) {
+    byte[] raw = fieldExtractor.extractField(record);
+    int first = (int) (Math.abs(h1.hashBytes(raw).asLong()) % workers.size());
+    buffers.get(first).add(record);
+  }
 }

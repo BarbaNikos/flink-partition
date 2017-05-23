@@ -11,25 +11,27 @@ import java.util.HashMap;
  */
 public class DEBSFrequentRouteAggregator extends Aggregator<Tuple2<String, Integer>> {
 
-    private DescriptiveStatistics statistics;
+  private DescriptiveStatistics statistics;
 
-    public DEBSFrequentRouteAggregator() {
-        statistics = new DescriptiveStatistics();
+  public DEBSFrequentRouteAggregator() {
+    statistics = new DescriptiveStatistics();
+  }
+
+  @Override
+  public void aggregate(Collection<Tuple2<String, Integer>> batch) {
+    long start = System.currentTimeMillis();
+    HashMap<String, Integer> histogram = new HashMap<>();
+    for (Tuple2<String, Integer> record : batch) {
+      if (histogram.containsKey(record.f0))
+        histogram.put(record.f0, histogram.get(record.f0) + record.f1);
+      else
+        histogram.put(record.f0, record.f1);
     }
+    long end = System.currentTimeMillis();
+    statistics.addValue(Math.abs(end - start));
+  }
 
-    @Override
-    public void aggregate(Collection<Tuple2<String, Integer>> batch) {
-        long start = System.currentTimeMillis();
-        HashMap<String, Integer> histogram = new HashMap<>();
-        for (Tuple2<String, Integer> record : batch) {
-            if (histogram.containsKey(record.f0))
-                histogram.put(record.f0, histogram.get(record.f0) + record.f1);
-            else
-                histogram.put(record.f0, record.f1);
-        }
-        long end = System.currentTimeMillis();
-        statistics.addValue(Math.abs(end - start));
-    }
-
-    public DescriptiveStatistics getStatistics() { return statistics.copy(); }
+  public DescriptiveStatistics getStatistics() {
+    return statistics.copy();
+  }
 }

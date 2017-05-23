@@ -10,16 +10,16 @@ import java.io.Serializable;
  * Created by Nikos R. Katsipoulakis on 1/6/2017.
  */
 public class NaiveCardPartitioner implements Partitioner<Object> {
-
-    private NaiveCardinalityPartitioner partitioner = null;
-
-    @Override
-    public int partition(Object key, int numPartitions) {
-        byte[] raw = SerializationUtils.serialize((Serializable) key);
-        if (partitioner == null) {
-            partitioner = new NaiveCardinalityPartitioner();
-            partitioner.init(numPartitions);
-        }
-        return partitioner.partitionNext(raw);
+  
+  private NaiveCardinalityPartitioner partitioner = null;
+  
+  @Override
+  public int partition(Object key, int numPartitions) {
+    byte[] raw = SerializationUtils.serialize((Serializable) key);
+    if (partitioner == null) {
+      partitioner = new NaiveCardinalityPartitioner();
+      partitioner.init(numPartitions);
     }
+    return partitioner.partitionNext(raw);
+  }
 }

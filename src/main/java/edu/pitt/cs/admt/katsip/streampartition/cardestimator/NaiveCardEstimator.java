@@ -8,24 +8,24 @@ import java.util.Set;
  */
 public class NaiveCardEstimator implements ICardEstimator {
 
-    private Set<byte[]> estimator;
+  private Set<byte[]> estimator;
 
-    public NaiveCardEstimator() {
-        estimator = new HashSet<>();
-    }
+  public NaiveCardEstimator() {
+    estimator = new HashSet<>();
+  }
 
-    @Override
-    public void update(byte[] raw) {
-        estimator.add(raw);
-    }
+  @Override
+  public void update(byte[] raw) {
+    estimator.add(raw);
+  }
 
-    @Override
-    public long estimateCardinality() {
-        return estimator.size();
-    }
+  @Override
+  public long estimateCardinality() {
+    return estimator.size();
+  }
 
-    @Override
-    public boolean contains(byte[] raw) {
-        return estimator.contains(raw);
-    }
+  @Override
+  public boolean contains(byte[] raw) {
+    return estimator.contains(raw);
+  }
 }

@@ -7,12 +7,12 @@ import java.util.Collection;
  */
 public abstract class Operator<T, W> implements IOperator<T, W> {
 
-    public Operator() {
+  public Operator() {
 
-    }
+  }
 
-    @Override
-    public void processWindow(Collection<T> inputWindow, Collection<W> output) {
+  @Override
+  public void processWindow(Collection<T> inputWindow, Collection<W> output) {
 
-    }
+  }
 }

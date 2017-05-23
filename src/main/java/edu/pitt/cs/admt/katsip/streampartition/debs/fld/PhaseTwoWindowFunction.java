@@ -1,4 +1,4 @@
-package edu.pitt.cs.admt.katsip.streampartition.debs.shf;
+package edu.pitt.cs.admt.katsip.streampartition.debs.fld;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.flink.api.common.accumulators.IntCounter;
@@ -13,19 +13,22 @@ import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Created by Nikos R. Katsipoulakis on 1/23/2017.
  */
-public class ShufflePhaseTwoWindowFunction extends
+public class PhaseTwoWindowFunction extends
     RichAllWindowFunction<Tuple3<Long, String, Integer>, String, TimeWindow> {
   
-  public static final String callsAccumulatorName = "p2-shf-num-calls";
-  public static final String accumulatorName = "p2-max-input-size-shf-acc";
-  private Logger log = LoggerFactory.getLogger(ShufflePhaseTwoWindowFunction.class);
+  public static final String numCallsAccumulatorName = "p2-fld-num-calls";
+  public static final String accumulatorName = "p2-max-input-size-fld-acc";
+  private Logger log = LoggerFactory.getLogger(PhaseTwoWindowFunction.class);
   private DescriptiveStatistics statistics;
-  private int maxInput;
+  private int maxInput = -1;
   private IntMaximum maxInputAccumulator;
   private IntCounter numberOfApplyCalls;
   
@@ -34,19 +37,19 @@ public class ShufflePhaseTwoWindowFunction extends
     statistics = new DescriptiveStatistics();
     maxInput = -1;
     maxInputAccumulator = new IntMaximum();
-    getRuntimeContext().addAccumulator(ShufflePhaseTwoWindowFunction.accumulatorName, this.maxInputAccumulator);
+    getRuntimeContext().addAccumulator(PhaseTwoWindowFunction.accumulatorName, this.maxInputAccumulator);
     numberOfApplyCalls = new IntCounter();
-    getRuntimeContext().addAccumulator(ShufflePhaseTwoWindowFunction.callsAccumulatorName, this.numberOfApplyCalls);
+    getRuntimeContext().addAccumulator(PhaseTwoWindowFunction.numCallsAccumulatorName, this.numberOfApplyCalls);
   }
   
   @Override
   public void close() {
     this.maxInputAccumulator.add(maxInput);
-    String msg = "shf-phase-2 object " + hashCode() + " received max input size: " + maxInput +
+    String msg = "fld-phase-2 object " + hashCode() + " received max input size: " + maxInput +
         ", mean: " + statistics.getMean() + ", max: " + statistics.getMax() + ", min: " +
         statistics.getMin() + " (msec).";
     log.info(msg);
-    System.out.println(msg);
+    //System.out.println(msg);
   }
   
   @Override
@@ -55,28 +58,20 @@ public class ShufflePhaseTwoWindowFunction extends
     numberOfApplyCalls.add(1);
     DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
     TreeMap<Integer, List<String>> index = new TreeMap<>();
-    HashMap<String, Integer> frequencyIndex = new HashMap<>();
     int inputSize = 0;
     long start = System.currentTimeMillis();
-    for (Tuple3<Long, String, Integer> t : values) {
+    for (Tuple3<Long, String, Integer> event : values) {
       ++inputSize;
-      if (frequencyIndex.containsKey(t.f1))
-        frequencyIndex.put(t.f1, frequencyIndex.get(t.f1) + t.f2);
-      else
-        frequencyIndex.put(t.f1, t.f2);
-    }
-    for (String route : frequencyIndex.keySet()) {
-      Integer finalFrequency = frequencyIndex.get(route);
-      if (index.containsKey(finalFrequency)) {
-        List<String> tmp = index.get(finalFrequency);
-        if (!tmp.contains(route)) {
-          tmp.add(route);
-          index.put(finalFrequency, tmp);
+      if (index.containsKey(event.f2)) {
+        List<String> tmp = index.get(event.f2);
+        if (!tmp.contains(event.f1)) {
+          tmp.add(event.f1);
+          index.put(event.f2, tmp);
         }
       } else {
         List<String> tmp = new LinkedList<>();
-        tmp.add(route);
-        index.put(finalFrequency, tmp);
+        tmp.add(event.f1);
+        index.put(event.f2, tmp);
       }
     }
     List<String> topTen = new LinkedList<>();
@@ -94,7 +89,7 @@ public class ShufflePhaseTwoWindowFunction extends
     long end = System.currentTimeMillis();
     stringBuilder.append("}");
     String s = "From: " + dateFormat.format(new Date(window.getStart())) + ", To: " + dateFormat.format(new Date(window.getEnd())) +
-        ", Most frequent routes: " + stringBuilder.toString();
+        ", Most frequent routes: " + stringBuilder.toString() + " (window-size: " + inputSize + ").";
     out.collect(s);
     maxInput = maxInput < inputSize ? inputSize : maxInput;
     statistics.addValue(Math.abs(end - start));

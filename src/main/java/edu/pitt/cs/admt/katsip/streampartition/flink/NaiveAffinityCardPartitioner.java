@@ -11,15 +11,15 @@ import java.io.Serializable;
  */
 public class NaiveAffinityCardPartitioner implements Partitioner<Object> {
 
-    private NaiveAffinityPartitioner partitioner = null;
+  private NaiveAffinityPartitioner partitioner = null;
 
-    @Override
-    public int partition(Object key, int numPartitions) {
-        byte[] raw = SerializationUtils.serialize((Serializable) key);
-        if (partitioner == null) {
-            partitioner = new NaiveAffinityPartitioner();
-            partitioner.init(numPartitions);
-        }
-        return partitioner.partitionNext(raw);
+  @Override
+  public int partition(Object key, int numPartitions) {
+    byte[] raw = SerializationUtils.serialize((Serializable) key);
+    if (partitioner == null) {
+      partitioner = new NaiveAffinityPartitioner();
+      partitioner.init(numPartitions);
     }
+    return partitioner.partitionNext(raw);
+  }
 }

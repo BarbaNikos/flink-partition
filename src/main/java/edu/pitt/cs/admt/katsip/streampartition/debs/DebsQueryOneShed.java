@@ -5,8 +5,6 @@ import edu.pitt.cs.admt.katsip.streampartition.debs.frequentroute.ShedErrorFunct
 import edu.pitt.cs.admt.katsip.streampartition.util.SimUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.flink.api.common.JobExecutionResult;
-import org.apache.flink.api.common.accumulators.Accumulator;
-import org.apache.flink.api.common.accumulators.Histogram;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -17,13 +15,11 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.runtime.tasks.SystemProcessingTimeService;
 import org.apache.flink.util.Preconditions;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -54,8 +50,8 @@ public class DebsQueryOneShed {
           @Override
           public Tuple3<Long, String, Integer> map(String s) throws Exception {
             String[] tokens = s.split(",");
-            return new Tuple3<Long, String, Integer>(Long.parseLong(tokens[1]),
-                tokens[2] + "-" + tokens[3], 1);
+            return new Tuple3<Long, String, Integer>(Long.parseLong(tokens[0]),
+                tokens[1] + "-" + tokens[2], 1);
           }
         })
         .assignTimestampsAndWatermarks(

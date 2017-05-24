@@ -38,7 +38,10 @@ public class ProduceCompactFile {
               out.collect(new Tuple3<>(ride.f2, ride.f3, ride.f4));
           }
         });
-    compactRides.sortPartition(0, Order.ASCENDING).writeAsCsv(args[1], "\n", ",");
+    compactRides
+        .partitionByRange(0)
+        .sortPartition(0, Order.ASCENDING)
+        .writeAsCsv(args[1], "\n", ",");
     env.execute();
   }
 }
